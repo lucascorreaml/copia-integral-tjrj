@@ -2,7 +2,7 @@
 
 Revisão completa do código depois da validação em produção. Feita sob o mesmo regime de evidência do resto do projeto: cada afirmação marcada, cada defeito reproduzido antes de corrigido, cada correção acompanhada de teste.
 
-Ponto de partida: 22 testes passando, execução real de 13.002 folhas sem erro. Ponto de chegada: 38 testes passando e sete defeitos corrigidos, dos quais dois faziam a extensão mentir sobre o próprio resultado.
+Ponto de partida: 22 testes passando, execução real de 13.002 folhas sem erro. Ponto de chegada: 54 testes passando, sete defeitos corrigidos — dois deles faziam a extensão mentir sobre o próprio resultado — e a terceira camada de conferência, que a especificação previa e nunca havia sido construída.
 
 ---
 
@@ -108,7 +108,30 @@ Em todos os casos o **código estava certo e o documento errado**, e o documento
 
 ---
 
-## 7. O que continua por verificar
+## 7. Camada 3, construída em modo de observação
+
+A especificação previa três camadas de conferência e só duas existiam. A terceira, leitura dos marcadores do PDF, era a mais forte das três e nunca havia sido construída.
+
+**Por que ela é a mais forte.** As camadas 1 e 2 são inferência: tamanho plausível, contagem de páginas aproximada. A camada 3 não infere nada, ela lê o próprio arquivo declarando, peça a peça, o que contém. `[OBSERVADO]` no RECON seção 5: não há `/PageLabels`, e a numeração dos autos viaja nos marcadores, cujos títulos trazem a folha à frente do rótulo.
+
+**Como foi feita sem dependência.** `DecompressionStream` é API nativa do navegador e do Node, e resolve o `FlateDecode` do PDF. `[OBSERVADO, por sonda]` ela recusa cauda de lixo depois do fim do fluxo, e varrer até `endstream` quase sempre traz cauda; a leitura por pedaços guarda tudo que já saiu, o que dispensa resolver a referência indireta de `/Length`. Dado que não é Flate, como imagem `JBIG2Decode`, devolve vazio em vez de estourar. Só fluxos `/ObjStm` são inflados, porque é onde dicionário de marcador se esconde quando comprimido.
+
+**Exercício contra caso realista**, com as funções de produção, 50 peças e rótulos acentuados gravados em UTF-16BE dentro de fluxo comprimido:
+
+```
+lote integro          : 50 marcadores lidos de 50, confere
+acento sobreviveu     : "1026 - Manifestação do Administrador Judicial"
+3 pecas omitidas      : apontou exatamente [1065, 1260, 1507]
+arquivo de 20 MB      : 1.134 ms, desprezivel diante do intervalo de 8 s
+```
+
+**E aqui está o limite deliberado.** Ela é **advertência, nunca rejeição**, e não entra no veredito de `completo`. Nada disso foi exercitado contra um PDF real do tribunal, produzido por iText 7.2.6, e barrar arquivo com base numa leitura não medida seria trocar uma ferramenta que funciona por uma suposição. O resultado por lote vai para o manifesto em `lotes[].marcadores`, e o resumo para `conferencia.marcadores`, para que a medição aconteça.
+
+**O que promove a camada 3 a trava dura.** Uma execução real em que os marcadores sejam lidos em todos os lotes e não acusem divergência nenhuma. Se isso acontecer, a divergência passa a reprovar o lote e a disparar nova tentativa, que é o comportamento que a RF-15b sempre quis ter e nunca pôde.
+
+---
+
+## 8. O que continua por verificar
 
 Nada aqui pode ser medido sem a sessão autenticada do tribunal, que é do usuário.
 
@@ -116,3 +139,4 @@ Nada aqui pode ser medido sem a sessão autenticada do tribunal, que é do usuá
 2. **Se `bytesReceived` de um download vindo de blob acompanha sempre o tamanho do blob.** Enquanto não for medido, a divergência é advertência e não erro, para não barrar arquivo de uma ferramenta que funciona.
 3. **Texto literal do rodapé que carrega a versão.** A leitura foi endurecida, mas continua sendo a única dependência de tela do produto. Se a aba de execução avisar que encontrou mais de uma candidata, é sinal de que este ponto precisa de um seletor de verdade.
 4. **Se o índice sempre devolve a peça que atravessa a borda da janela.** É `[INFERIDO]`, e é o que sustenta a RF-21. Teste: consultar uma janela inteiramente coberta por uma única peça longa e conferir se a árvore vem com essa peça ou vazia.
+5. **Se os marcadores de um PDF real do tribunal são legíveis pela Camada 3.** É o que decide se ela vira trava dura. Não exige teste próprio: basta uma execução comum e olhar o que a aba de execução diz ao final e o campo `conferencia.marcadores` do manifesto.

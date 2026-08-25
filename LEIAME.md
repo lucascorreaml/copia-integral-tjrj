@@ -44,6 +44,8 @@ Só aparece **CONCLUÍDO** quando as duas listas fecham e todas as janelas de mi
 
 O campo que responde à sua pergunta, dentro do manifesto, é `conferencia.completo`. Se ele for `true`, os autos vieram inteiros dentro do filtro escolhido.
 
+Além disso, cada PDF é conferido contra os próprios marcadores, que são o índice interno do arquivo e trazem a folha de cada peça. É o arquivo declarando o que contém, em vez de a extensão deduzir pelo tamanho. Essa conferência **ainda não barra nada**, porque não foi medida contra arquivo real do tribunal: por ora ela só observa e anota. Se ao final aparecer o aviso de que os marcadores não bateram em algum lote, me mostre, porque é isso que decide se ela pode virar trava de verdade.
+
 ---
 
 ## Enquanto estiver rodando

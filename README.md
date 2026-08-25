@@ -50,6 +50,8 @@ lib/            as decisões, puras e testadas fora do navegador
 
 **A conclusão não é contada, é conciliada.** A extensão guarda a lista de peças que o índice declarou e compara com o que foi baixado. Só anuncia conclusão quando as duas fecham e todas as janelas foram varridas. Se faltar algo, ela diz folha e nome de cada peça ausente.
 
+**Cada PDF é conferido contra os próprios marcadores.** Os marcadores trazem a folha à frente do rótulo de cada peça, então o arquivo declara o que contém, e isso é comparado item a item com o que foi pedido. A leitura é feita sem biblioteca externa, com `DecompressionStream`. Por ora é advertência e não rejeição, porque ainda não foi medida contra PDF real do tribunal.
+
 ---
 
 ## Desenvolver
@@ -58,7 +60,7 @@ lib/            as decisões, puras e testadas fora do navegador
 npm test
 ```
 
-38 testes das funções puras. Não precisa de Chrome, de rede nem de acesso ao tribunal.
+54 testes das funções puras. Não precisa de Chrome, de rede nem de acesso ao tribunal.
 
 Regras para qualquer alteração:
 

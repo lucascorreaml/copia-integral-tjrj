@@ -215,6 +215,14 @@ Todos nascem de defeito encontrado por leitura e reproduzido em simulação, e c
 
 **RF-26.** A leitura da versão do rodapé exige a forma de número pontuado e fica com a **última** ocorrência da página, porque a árvore do índice carrega texto livre das peças e vem antes do rodapé. Havendo mais de uma candidata, a aba de execução avisa qual foi usada.
 
+**RF-27, a Camada 3 da conferência.** Cada lote recebido tem seus marcadores lidos e comparados, item a item, com a lista de peças que o lote pediu. A folha de cada peça é extraída do título do marcador, que traz o número à frente do rótulo.
+
+`[OBSERVADO]` No RECON seção 5: o PDF não possui `/PageLabels`, e a numeração dos autos viaja nos marcadores, cujos títulos reproduzem os rótulos da árvore. No teste de cinquenta peças, a lista de marcadores reproduziu a lista pedida sem omissão, substituição nem reordenação.
+
+**RF-27b, e este limite é deliberado.** A Camada 3 é **advertência, nunca rejeição**, e não entra no veredito de `completo`. O leitor de marcadores nunca foi exercitado contra um PDF real do tribunal, produzido por iText 7.2.6. Barrar arquivo com base numa leitura não medida seria trocar uma ferramenta que funciona por uma suposição. O resultado por lote vai para o manifesto, em `lotes[].marcadores`, e o resumo para `conferencia.marcadores`, justamente para permitir a medição que autoriza a promoção a trava dura.
+
+**RF-27c.** A leitura não usa dependência externa: a descompressão é feita por `DecompressionStream`, que é API nativa. Só fluxos marcados como `/ObjStm` são inflados, porque dicionário de marcador ou está solto no arquivo, e o texto cru já o traz, ou está dentro de fluxo de objetos. `[OBSERVADO, por sonda]` inflar tudo significaria descomprimir centenas de megabytes de imagem de página, em `JBIG2Decode` e `JPXDecode`, para não achar nada.
+
 ---
 
 ## 7. Requisitos não funcionais
@@ -241,7 +249,7 @@ A especificação pedia também `activeTab` e `scripting`. Nenhuma das duas foi 
 
 **Camada 2, sempre.** Soma das extensões esperadas do lote confrontada com o número de páginas do arquivo, obtido pela contagem de objetos de página. `[OBSERVADO]` no teste de cinquenta peças de uma página, o entregue bateu com o esperado.
 
-**Camada 3, recomendada.** Leitura dos marcadores do PDF e comparação, item a item, com a lista de folhas pedidas. `[OBSERVADO]` os marcadores reproduzem a lista pedida sem omissão, substituição ou reordenação, o que faz deles o instrumento natural de conferência.
+**Camada 3, construída em 25/08/2026, em modo de observação.** Leitura dos marcadores do PDF e comparação, item a item, com a lista de folhas pedidas. `[OBSERVADO]` os marcadores reproduzem a lista pedida sem omissão, substituição ou reordenação, o que faz deles o instrumento natural de conferência. Ver **RF-27**.
 
 **Não usar carimbo de página como referência.** `[OBSERVADO]` o carimbo é da serventia, aplicado no papel, e diverge da folha virtual em magnitude crescente. Nas medições, folha virtual 517 trazia carimbo 506, e folha virtual 523 trazia carimbo 511.
 
@@ -303,6 +311,7 @@ copia-integral-tjrj/
 │       ├── indexador.js       achatamento, janelas, deduplicação, extensão de peça
 │       ├── lotes.js           particionamento e nomeação
 │       ├── conferencia.js     travas de integridade do arquivo recebido
+│       ├── marcadores.js      leitura dos marcadores do PDF, a Camada 3
 │       ├── conciliacao.js     veredito sobre a integralidade da execução
 │       └── estado.js          persistência para retomada
 ├── test/                      amostras e testes das funções puras, rodam em Node

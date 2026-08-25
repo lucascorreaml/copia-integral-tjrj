@@ -91,3 +91,64 @@ export function pdfFalso(paginas, bytesAlvo) {
 export function pdfDegenerado() {
   return pdfFalso(0, 941);
 }
+
+// --------------------------------------------------------------- marcadores
+// Os marcadores do PDF reproduzem os rotulos da arvore com a folha a frente,
+// e sao o instrumento de conferencia previsto na especificacao, Camada 3.
+// Ver RECON secao 5. As amostras abaixo reproduzem as duas formas em que os
+// marcadores podem chegar: soltos no arquivo, e dentro de fluxo comprimido.
+
+function comoBytes(texto) {
+  return new Uint8Array([...texto].map(c => c.charCodeAt(0)));
+}
+
+function juntar(...partes) {
+  const total = partes.reduce((s, p) => s + p.length, 0);
+  const saida = new Uint8Array(total);
+  let i = 0;
+  for (const p of partes) { saida.set(p, i); i += p.length; }
+  return saida;
+}
+
+function dicionariosDeTitulo(titulos) {
+  return titulos.map((t, i) => `${i + 10} 0 obj\n<< /Title (${t}) /Parent 5 0 R >>\nendobj\n`).join('');
+}
+
+/** PDF com os marcadores soltos, sem compressao. */
+export function pdfComMarcadores(titulos, paginas = 0, bytesAlvo = 20000) {
+  let corpo = '%PDF-1.7\n';
+  for (let i = 0; i < paginas; i++) corpo += `${i + 100} 0 obj\n<< /Type /Page >>\nendobj\n`;
+  corpo += dicionariosDeTitulo(titulos);
+  corpo += '\n% recheio\n';
+  while (corpo.length < bytesAlvo) corpo += 'x';
+  return comoBytes(corpo);
+}
+
+/** PDF com os marcadores dentro de um fluxo de objetos comprimido. */
+export async function pdfComMarcadoresComprimidos(titulos, paginas = 0, bytesAlvo = 20000) {
+  const cs = new CompressionStream('deflate');
+  const escritor = cs.writable.getWriter();
+  escritor.write(comoBytes(dicionariosDeTitulo(titulos)));
+  escritor.close();
+  const comprimido = new Uint8Array(await new Response(cs.readable).arrayBuffer());
+
+  let cabeca = '%PDF-1.7\n';
+  for (let i = 0; i < paginas; i++) cabeca += `${i + 100} 0 obj\n<< /Type /Page >>\nendobj\n`;
+  cabeca += `1 0 obj\n<< /Type /ObjStm /N ${titulos.length} /First 20 /Filter /FlateDecode /Length ${comprimido.length} >>\nstream\n`;
+  let cauda = '\nendstream\nendobj\n% recheio\n';
+  while (cauda.length + cabeca.length + comprimido.length < bytesAlvo) cauda += 'x';
+  return juntar(comoBytes(cabeca), comprimido, comoBytes(cauda));
+}
+
+/** Um fluxo comprimido que NAO e de objetos, como imagem de pagina. */
+export async function pdfComImagemComprimida(bytesAlvo = 20000) {
+  const cs = new CompressionStream('deflate');
+  const escritor = cs.writable.getWriter();
+  escritor.write(comoBytes('/Title (isto aqui nao e marcador, e conteudo de imagem)'));
+  escritor.close();
+  const comprimido = new Uint8Array(await new Response(cs.readable).arrayBuffer());
+  const cabeca = `%PDF-1.7\n7 0 obj\n<< /Type /XObject /Subtype /Image /Filter /FlateDecode /Length ${comprimido.length} >>\nstream\n`;
+  let cauda = '\nendstream\nendobj\n% recheio\n';
+  while (cauda.length + cabeca.length + comprimido.length < bytesAlvo) cauda += 'x';
+  return juntar(comoBytes(cabeca), comprimido, comoBytes(cauda));
+}

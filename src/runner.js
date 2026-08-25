@@ -12,6 +12,7 @@ import { particionar, nomeArquivo, limparCnj } from './lib/lotes.js';
 import { verificarLote } from './lib/conferencia.js';
 import { carregar, salvar, apagar, estadoNovo } from './lib/estado.js';
 import { registrarErro, errosPendentes, conciliar, janelaVaziaEhLegitima } from './lib/conciliacao.js';
+import { conferir as conferirMarcadoresDoLote } from './lib/marcadores.js';
 
 const ESPERA_APOS_LIMITE_MS = 5 * 60 * 1000;
 const MAX_TENTATIVAS = 3;
@@ -115,6 +116,29 @@ async function salvarEstado() {
       'Se a mensagem falar em cota de armazenamento, use Limpar progresso e recomece.'
     );
   }
+}
+
+/**
+ * Traduz o veredito dos marcadores em linhas legiveis.
+ * Nenhuma delas barra o arquivo: sao observacao, para que a divergencia
+ * apareca no registro e no manifesto e possa ser medida contra execucao real.
+ */
+function avisosDeMarcador(marcas) {
+  if (!marcas) return [];
+  if (!marcas.legivel) return [`não consegui ler os marcadores deste arquivo (${marcas.motivo})`];
+  if (marcas.confere) return [];
+  const linhas = [];
+  const amostrar = (lista, comoTexto) =>
+    lista.slice(0, 3).map(comoTexto).join(', ') + (lista.length > 3 ? ' e outras' : '');
+  if (marcas.ausentes.length) {
+    linhas.push(`os marcadores não trazem ${marcas.ausentes.length} peça(s) que foram pedidas: ` +
+      amostrar(marcas.ausentes, p => `folha ${p.folha}`));
+  }
+  if (marcas.inesperadas.length) {
+    linhas.push(`os marcadores trazem ${marcas.inesperadas.length} peça(s) que não foram pedidas: ` +
+      amostrar(marcas.inesperadas, f => `folha ${f}`));
+  }
+  return linhas;
 }
 
 /** Registra que o indice declarou estas pecas. E contra isto que se concilia. */
@@ -377,6 +401,20 @@ async function anunciarVeredito(v) {
   if (v.errosSanados > 0) {
     reg(`${v.errosSanados} lote(s) que já haviam falhado estão baixados e deixaram de pesar.`, 'm-ok');
   }
+
+  // Camada 3, em modo de observação. Não altera o veredito, mas precisa ser
+  // vista, porque é a medição que decide se ela pode virar trava de verdade.
+  const comMarcas = estado.lotes.filter(l => l.situacao === 'concluido' && l.marcadores);
+  const divergentes = comMarcas.filter(l => l.marcadores.legivel && !l.marcadores.confere);
+  const ilegiveis = comMarcas.filter(l => !l.marcadores.legivel);
+  if (divergentes.length) {
+    reg(`ATENÇÃO: em ${divergentes.length} de ${comMarcas.length} lote(s), os marcadores do PDF não bateram com a lista de peças pedida. Isso não barrou nada e é só observação. O detalhe está no manifesto, em lotes[].marcadores. Vale me mostrar.`, 'm-aviso');
+  } else if (comMarcas.length > 0 && ilegiveis.length === comMarcas.length) {
+    reg('não consegui ler os marcadores de nenhum lote. A conferência por tamanho e a conciliação contra o índice continuam valendo.', 'm-aviso');
+  } else if (comMarcas.length > 0) {
+    reg(`marcadores conferidos em ${comMarcas.length - ilegiveis.length} de ${comMarcas.length} lote(s), sem divergência.`, 'm-ok');
+  }
+
   if (pausaPedida) {
     reg('pausado. Clique em Iniciar para continuar de onde parou.', 'm-aviso');
     return;
@@ -435,6 +473,20 @@ async function processarLote(lote, vistos) {
         reg(`${rotulo}: ${aviso}${nota}`, 'm-aviso');
       }
 
+      // Camada 3: os marcadores do PDF declaram, peça a peça, o que o arquivo
+      // contém. É a conferência mais forte disponível, porque não depende de
+      // metadado de resposta nem de estimativa de tamanho.
+      //
+      // ADVERTÊNCIA, e não rejeição, enquanto o leitor não tiver sido medido
+      // contra execução real. Barrar arquivo com base numa leitura nunca
+      // exercitada contra PDF do tribunal seria trocar uma ferramenta que
+      // funciona por uma suposição. Ver src/lib/marcadores.js.
+      const marcas = await conferirMarcadoresDoLote(bytes, lote.pecas);
+      for (const aviso of avisosDeMarcador(marcas)) {
+        conf.avisos.push(aviso);
+        reg(`${rotulo}: ${aviso}`, 'm-aviso');
+      }
+
       // O sequencial so e consumido quando existe arquivo para carregar o numero.
       // Antes ele era gasto antes do download e devolvido na falha, o que fazia
       // dois registros do manifesto compartilharem o mesmo numero.
@@ -454,6 +506,13 @@ async function processarLote(lote, vistos) {
         janela: lote.janela, folhaInicial: lote.folhaInicial, folhaFinal: lote.folhaFinal,
         pecas: lote.pecas.map(p => ({ folha: p.folha, rotulo: p.rotulo, codDoctoElet: p.codDoctoElet, paginas: p.paginas })),
         paginasEsperadas: lote.paginasEsperadas, paginasLidas: conf.paginasLidas,
+        marcadores: {
+          legivel: marcas.legivel,
+          confere: marcas.confere,
+          motivo: marcas.motivo,
+          folhasSemMarcador: marcas.ausentes.map(p => p.folha),
+          marcadoresInesperados: marcas.inesperadas
+        },
         bytes: r.bytes, ms: r.ms, avisos: conf.avisos
       });
       await salvarEstado();
@@ -517,7 +576,13 @@ function montarRelatorio(veredito) {
       pecasFaltantes: veredito.faltantes,
       janelasNaoVarridas: veredito.janelasPendentes,
       lotesAindaEmErro: veredito.lotesPendentes.length,
-      lotesQueFalharamEForamRefeitos: veredito.errosSanados
+      lotesQueFalharamEForamRefeitos: veredito.errosSanados,
+      // Camada 3, em modo de observacao. Nao entra no veredito de completo.
+      marcadores: {
+        lotesConferidos: concluidos.filter(l => l.marcadores && l.marcadores.legivel).length,
+        lotesIlegiveis: concluidos.filter(l => l.marcadores && !l.marcadores.legivel).length,
+        lotesDivergentes: concluidos.filter(l => l.marcadores && l.marcadores.legivel && !l.marcadores.confere).length
+      }
     },
     resumo: {
       lotesConcluidos: concluidos.length,

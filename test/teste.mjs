@@ -7,7 +7,13 @@ import { verificarLote, parecePdf, contarPaginas, pisoDeBytes } from '../src/lib
 import {
   registrarErro, errosPendentes, pecasFaltantes, janelaVaziaEhLegitima, conciliar
 } from '../src/lib/conciliacao.js';
-import { janela1a1000, janela500a1000, janela1001a2000, pdfFalso, pdfDegenerado } from './amostras.mjs';
+import {
+  decodificarStringPdf, extrairTitulos, folhaDoTitulo, conferir
+} from '../src/lib/marcadores.js';
+import {
+  janela1a1000, janela500a1000, janela1001a2000, pdfFalso, pdfDegenerado,
+  pdfComMarcadores, pdfComMarcadoresComprimidos, pdfComImagemComprimida
+} from './amostras.mjs';
 
 let passou = 0, falhou = 0;
 function teste(nome, fn) {
@@ -19,6 +25,10 @@ function igual(a, b, msg) {
   if (x !== y) throw new Error(`${msg || 'esperava'} ${y}, veio ${x}`);
 }
 function verdade(v, msg) { if (!v) throw new Error(msg || 'esperava verdadeiro'); }
+async function testeA(nome, fn) {
+  try { await fn(); console.log(`  ok   ${nome}`); passou++; }
+  catch (e) { console.log(`  FALHA ${nome}\n        ${e.message}`); falhou++; }
+}
 
 // Amostras de conciliacao. Tres pecas declaradas pelo indice, uma delas la no fim.
 const declaradas3 = [
@@ -238,6 +248,74 @@ teste('lote de cinquenta pecas com arquivo plausivel passa', () => {
 });
 teste('sem informar o numero de pecas, vale o piso absoluto de antes', () => {
   verdade(verificarLote(pdfFalso(50, 60000), 50).valido);
+});
+
+console.log('\nT-15  leitura dos marcadores do PDF');
+teste('decodifica string literal', () => igual(decodificarStringPdf('(1 - Capa)'), '1 - Capa'));
+teste('decodifica parentese e barra escapados', () => {
+  igual(decodificarStringPdf('(Peticao \\(fls. 2\\) inicial)'), 'Peticao (fls. 2) inicial');
+  igual(decodificarStringPdf('(a\\\\b)'), 'a\\b');
+});
+teste('decodifica escape octal', () => igual(decodificarStringPdf('(\\101\\102)'), 'AB'));
+teste('decodifica string hexadecimal', () => igual(decodificarStringPdf('<312D43617061>'), '1-Capa'));
+teste('decodifica UTF-16BE com marca de ordem, que e como o acento chega', () => {
+  igual(decodificarStringPdf('<FEFF005000650074006900E700E3006F>'), 'Petição');
+});
+teste('extrai varios titulos de um texto', () => {
+  igual(extrairTitulos('<< /Title (1 - Capa) >> lixo << /Title (974 - Laudo) /Parent 5 0 R >>'),
+    ['1 - Capa', '974 - Laudo']);
+});
+teste('titulo com parentese aninhado nao trunca', () => {
+  igual(extrairTitulos('/Title (Peticao (fls. 2) inicial)'), ['Peticao (fls. 2) inicial']);
+});
+teste('ignora /Title que nao seja string', () => igual(extrairTitulos('/Title 9 0 R'), []));
+teste('a folha vem na frente do rotulo', () => {
+  igual(folhaDoTitulo('974 - Laudo Pericial'), 974);
+  igual(folhaDoTitulo('1 - Capa'), 1);
+});
+teste('rotulo sem folha a frente devolve nulo', () => {
+  igual(folhaDoTitulo('Laudo Pericial'), null);
+  igual(folhaDoTitulo(''), null);
+});
+
+console.log('\nT-16  conferencia pelos marcadores, a Camada 3');
+const pecas3 = [
+  { folha: 1, rotulo: '1 - Capa', codDoctoElet: 'A' },
+  { folha: 974, rotulo: '974 - Laudo Pericial', codDoctoElet: 'B' }
+];
+
+await testeA('le marcadores de PDF sem compressao', async () => {
+  const r = await conferir(pdfComMarcadores(['1 - Capa', '974 - Laudo Pericial'], 2), pecas3);
+  verdade(r.legivel, 'devia conseguir ler');
+  verdade(r.confere, `devia conferir, ausentes: ${JSON.stringify(r.ausentes)}`);
+});
+await testeA('le marcadores de dentro de fluxo comprimido', async () => {
+  const bytes = await pdfComMarcadoresComprimidos(['1 - Capa', '974 - Laudo Pericial'], 2);
+  verdade(!String.fromCharCode(...bytes).includes('974 - Laudo'), 'a amostra precisa esconder o titulo do texto cru');
+  const r = await conferir(bytes, pecas3);
+  verdade(r.legivel, 'devia inflar o fluxo de objetos e achar os marcadores');
+  verdade(r.confere, `devia conferir, ausentes: ${JSON.stringify(r.ausentes)}`);
+});
+await testeA('nao vasculha fluxo de imagem, so fluxo de objetos', async () => {
+  const r = await conferir(await pdfComImagemComprimida(), pecas3);
+  verdade(!r.legivel, 'nao ha marcador neste arquivo, e o /Title dentro da imagem nao vale');
+});
+await testeA('peca pedida sem marcador correspondente e apontada', async () => {
+  const r = await conferir(pdfComMarcadores(['1 - Capa'], 1), pecas3);
+  verdade(r.legivel);
+  verdade(!r.confere, 'faltou a peca da folha 974');
+  igual(r.ausentes.map(p => p.folha), [974]);
+});
+await testeA('marcador sem peca correspondente e apontado', async () => {
+  const r = await conferir(pdfComMarcadores(['1 - Capa', '974 - Laudo Pericial', '2000 - Intrusa'], 3), pecas3);
+  verdade(!r.confere, 'veio peca que nao foi pedida');
+  igual(r.inesperadas, [2000]);
+});
+await testeA('PDF ilegivel nao acusa ausencia, so declara que nao leu', async () => {
+  const r = await conferir(pdfFalso(3, 20000), pecas3);
+  verdade(!r.legivel, 'nao ha marcador neste PDF');
+  igual(r.ausentes, [], 'sem conseguir ler, nao pode acusar peca faltando');
+  verdade(!r.confere);
 });
 
 console.log(`\n${passou} passaram, ${falhou} falharam\n`);
