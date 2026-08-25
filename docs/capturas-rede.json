@@ -1,0 +1,886 @@
+[
+  {
+    "tipo": "xhr",
+    "metodo": "POST",
+    "url": "/visproc/api/jwt-auth",
+    "cabecalhos": {
+      "Accept": "application/json, text/plain, */*"
+    },
+    "corpo": null,
+    "status": 200,
+    "respostaCabecalhos": {
+      "content-type": "application/json",
+      "content-disposition": null
+    }
+  },
+  {
+    "tipo": "xhr",
+    "metodo": "POST",
+    "url": "/visproc/api/site-key",
+    "cabecalhos": {
+      "Accept": "application/json, text/plain, */*"
+    },
+    "corpo": null,
+    "status": 204,
+    "respostaCabecalhos": {
+      "content-type": null,
+      "content-disposition": null
+    }
+  },
+  {
+    "tipo": "xhr",
+    "metodo": "POST",
+    "url": "/visproc/api/consultarInfo",
+    "cabecalhos": {
+      "Content-Type": "application/json;charset=UTF-8",
+      "ETag": "MC42LjY=",
+      "Authorization": "[REDIGIDO]",
+      "Accept": "application/json, text/plain, */*"
+    },
+    "corpo": "{\"codHash\":\"<codHash>\"}",
+    "status": 200,
+    "respostaCabecalhos": {
+      "content-type": "application/json",
+      "content-disposition": null
+    }
+  },
+  {
+    "tipo": "xhr",
+    "metodo": "POST",
+    "url": "/visproc/api/jwt-auth",
+    "cabecalhos": {
+      "Accept": "application/json, text/plain, */*"
+    },
+    "corpo": null,
+    "status": 200,
+    "respostaCabecalhos": {
+      "content-type": "application/json",
+      "content-disposition": null
+    }
+  },
+  {
+    "tipo": "xhr",
+    "metodo": "POST",
+    "url": "/visproc/api/site-key",
+    "cabecalhos": {
+      "Accept": "application/json, text/plain, */*"
+    },
+    "corpo": null,
+    "status": 204,
+    "respostaCabecalhos": {
+      "content-type": null,
+      "content-disposition": null
+    }
+  },
+  {
+    "tipo": "xhr",
+    "metodo": "POST",
+    "url": "/visproc/api/consultarProcesso",
+    "cabecalhos": {
+      "Content-Type": "application/json;charset=UTF-8",
+      "ETag": "MC42LjY=",
+      "Authorization": "[REDIGIDO]",
+      "Accept": "application/json, text/plain, */*"
+    },
+    "corpo": "{\"codHash\":\"<codHash>\",\"numFolhas\":\"50\",\"tiposArquivo\":\"SD\"}",
+    "status": 200,
+    "respostaCabecalhos": {
+      "content-type": "application/json",
+      "content-disposition": null
+    }
+  },
+  {
+    "tipo": "xhr",
+    "metodo": "POST",
+    "url": "/visproc/api/jwt-auth",
+    "cabecalhos": {
+      "Accept": "application/json, text/plain, */*"
+    },
+    "corpo": null,
+    "status": 200,
+    "respostaCabecalhos": {
+      "content-type": "application/json",
+      "content-disposition": null
+    }
+  },
+  {
+    "tipo": "xhr",
+    "metodo": "POST",
+    "url": "/visproc/api/site-key",
+    "cabecalhos": {
+      "Accept": "application/json, text/plain, */*"
+    },
+    "corpo": null,
+    "status": 204,
+    "respostaCabecalhos": {
+      "content-type": null,
+      "content-disposition": null
+    }
+  },
+  {
+    "tipo": "xhr",
+    "metodo": "POST",
+    "url": "/visproc/api/consultarProcesso",
+    "cabecalhos": {
+      "Content-Type": "application/json;charset=UTF-8",
+      "ETag": "MC42LjY=",
+      "Authorization": "[REDIGIDO]",
+      "Accept": "application/json, text/plain, */*"
+    },
+    "corpo": "{\"codHash\":\"<codHash>\",\"tiposArquivo\":\"SD\",\"paginaInicial\":1,\"paginaFinal\":10}",
+    "status": 200,
+    "respostaCabecalhos": {
+      "content-type": "application/json",
+      "content-disposition": null
+    }
+  },
+  {
+    "tipo": "xhr",
+    "metodo": "POST",
+    "url": "/visproc/api/jwt-auth",
+    "cabecalhos": {
+      "Accept": "application/json, text/plain, */*"
+    },
+    "corpo": null,
+    "status": 200,
+    "respostaCabecalhos": {
+      "content-type": "application/json",
+      "content-disposition": null
+    }
+  },
+  {
+    "tipo": "xhr",
+    "metodo": "POST",
+    "url": "/visproc/api/site-key",
+    "cabecalhos": {
+      "Accept": "application/json, text/plain, */*"
+    },
+    "corpo": null,
+    "status": 204,
+    "respostaCabecalhos": {
+      "content-type": null,
+      "content-disposition": null
+    }
+  },
+  {
+    "tipo": "xhr",
+    "metodo": "POST",
+    "url": "/visproc/api/consultarProcesso",
+    "cabecalhos": {
+      "Content-Type": "application/json;charset=UTF-8",
+      "ETag": "MC42LjY=",
+      "Authorization": "[REDIGIDO]",
+      "Accept": "application/json, text/plain, */*"
+    },
+    "corpo": "{\"codHash\":\"<codHash>\",\"tiposArquivo\":\"SD\",\"paginaInicial\":10,\"paginaFinal\":10}",
+    "status": 200,
+    "respostaCabecalhos": {
+      "content-type": "application/json",
+      "content-disposition": null
+    }
+  },
+  {
+    "tipo": "xhr",
+    "metodo": "POST",
+    "url": "/visproc/api/jwt-auth",
+    "cabecalhos": {
+      "Accept": "application/json, text/plain, */*"
+    },
+    "corpo": null,
+    "status": 200,
+    "respostaCabecalhos": {
+      "content-type": "application/json",
+      "content-disposition": null
+    }
+  },
+  {
+    "tipo": "xhr",
+    "metodo": "POST",
+    "url": "/visproc/api/site-key",
+    "cabecalhos": {
+      "Accept": "application/json, text/plain, */*"
+    },
+    "corpo": null,
+    "status": 204,
+    "respostaCabecalhos": {
+      "content-type": null,
+      "content-disposition": null
+    }
+  },
+  {
+    "tipo": "xhr",
+    "metodo": "POST",
+    "url": "/visproc/api/consultarProcesso",
+    "cabecalhos": {
+      "Content-Type": "application/json;charset=UTF-8",
+      "ETag": "MC42LjY=",
+      "Authorization": "[REDIGIDO]",
+      "Accept": "application/json, text/plain, */*"
+    },
+    "corpo": "{\"codHash\":\"<codHash>\",\"tiposArquivo\":\"SD\",\"paginaInicial\":0,\"paginaFinal\":1}",
+    "status": 200,
+    "respostaCabecalhos": {
+      "content-type": "application/json",
+      "content-disposition": null
+    }
+  },
+  {
+    "tipo": "xhr",
+    "metodo": "POST",
+    "url": "/visproc/api/jwt-auth",
+    "cabecalhos": {
+      "Accept": "application/json, text/plain, */*"
+    },
+    "corpo": null,
+    "status": 200,
+    "respostaCabecalhos": {
+      "content-type": "application/json",
+      "content-disposition": null
+    }
+  },
+  {
+    "tipo": "xhr",
+    "metodo": "POST",
+    "url": "/visproc/api/site-key",
+    "cabecalhos": {
+      "Accept": "application/json, text/plain, */*"
+    },
+    "corpo": null,
+    "status": 204,
+    "respostaCabecalhos": {
+      "content-type": null,
+      "content-disposition": null
+    }
+  },
+  {
+    "tipo": "xhr",
+    "metodo": "POST",
+    "url": "/visproc/api/consultarProcesso",
+    "cabecalhos": {
+      "Content-Type": "application/json;charset=UTF-8",
+      "ETag": "MC42LjY=",
+      "Authorization": "[REDIGIDO]",
+      "Accept": "application/json, text/plain, */*"
+    },
+    "corpo": "{\"codHash\":\"<codHash>\",\"tiposArquivo\":\"SD\",\"paginaInicial\":1,\"paginaFinal\":1000}",
+    "status": 200,
+    "respostaCabecalhos": {
+      "content-type": "application/json",
+      "content-disposition": null
+    }
+  },
+  {
+    "tipo": "xhr",
+    "metodo": "POST",
+    "url": "/visproc/api/jwt-auth",
+    "cabecalhos": {
+      "Accept": "application/json, text/plain, */*"
+    },
+    "corpo": null,
+    "status": 200,
+    "respostaCabecalhos": {
+      "content-type": "application/json",
+      "content-disposition": null
+    }
+  },
+  {
+    "tipo": "xhr",
+    "metodo": "POST",
+    "url": "/visproc/api/site-key",
+    "cabecalhos": {
+      "Accept": "application/json, text/plain, */*"
+    },
+    "corpo": null,
+    "status": 204,
+    "respostaCabecalhos": {
+      "content-type": null,
+      "content-disposition": null
+    }
+  },
+  {
+    "tipo": "xhr",
+    "metodo": "POST",
+    "url": "/visproc/api/consultarProcesso",
+    "cabecalhos": {
+      "Content-Type": "application/json;charset=UTF-8",
+      "ETag": "MC42LjY=",
+      "Authorization": "[REDIGIDO]",
+      "Accept": "application/json, text/plain, */*"
+    },
+    "corpo": "{\"codHash\":\"<codHash>\",\"tiposArquivo\":\"SD\",\"paginaInicial\":1000,\"paginaFinal\":1999}",
+    "status": 200,
+    "respostaCabecalhos": {
+      "content-type": "application/json",
+      "content-disposition": null
+    }
+  },
+  {
+    "tipo": "xhr",
+    "metodo": "POST",
+    "url": "/visproc/api/jwt-auth",
+    "cabecalhos": {
+      "Accept": "application/json, text/plain, */*"
+    },
+    "corpo": null,
+    "status": 200,
+    "respostaCabecalhos": {
+      "content-type": "application/json",
+      "content-disposition": null
+    }
+  },
+  {
+    "tipo": "xhr",
+    "metodo": "POST",
+    "url": "/visproc/api/site-key",
+    "cabecalhos": {
+      "Accept": "application/json, text/plain, */*"
+    },
+    "corpo": null,
+    "status": 204,
+    "respostaCabecalhos": {
+      "content-type": null,
+      "content-disposition": null
+    }
+  },
+  {
+    "tipo": "xhr",
+    "metodo": "POST",
+    "url": "/visproc/api/consultarProcesso",
+    "cabecalhos": {
+      "Content-Type": "application/json;charset=UTF-8",
+      "ETag": "MC42LjY=",
+      "Authorization": "[REDIGIDO]",
+      "Accept": "application/json, text/plain, */*"
+    },
+    "corpo": "{\"codHash\":\"<codHash>\",\"tiposArquivo\":\"SD\",\"paginaInicial\":1999,\"paginaFinal\":1999}",
+    "status": 200,
+    "respostaCabecalhos": {
+      "content-type": "application/json",
+      "content-disposition": null
+    }
+  },
+  {
+    "tipo": "xhr",
+    "metodo": "POST",
+    "url": "/visproc/api/jwt-auth",
+    "cabecalhos": {
+      "Accept": "application/json, text/plain, */*"
+    },
+    "corpo": null,
+    "status": 200,
+    "respostaCabecalhos": {
+      "content-type": "application/json",
+      "content-disposition": null
+    }
+  },
+  {
+    "tipo": "xhr",
+    "metodo": "POST",
+    "url": "/visproc/api/site-key",
+    "cabecalhos": {
+      "Accept": "application/json, text/plain, */*"
+    },
+    "corpo": null,
+    "status": 204,
+    "respostaCabecalhos": {
+      "content-type": null,
+      "content-disposition": null
+    }
+  },
+  {
+    "tipo": "xhr",
+    "metodo": "POST",
+    "url": "/visproc/api/consultarProcesso",
+    "cabecalhos": {
+      "Content-Type": "application/json;charset=UTF-8",
+      "ETag": "MC42LjY=",
+      "Authorization": "[REDIGIDO]",
+      "Accept": "application/json, text/plain, */*"
+    },
+    "corpo": "{\"codHash\":\"<codHash>\",\"numFolhas\":\"1000\",\"tiposArquivo\":\"SD\"}",
+    "status": 200,
+    "respostaCabecalhos": {
+      "content-type": "application/json",
+      "content-disposition": null
+    }
+  },
+  {
+    "tipo": "xhr",
+    "metodo": "POST",
+    "url": "/visproc/api/jwt-auth",
+    "cabecalhos": {
+      "Accept": "application/json, text/plain, */*"
+    },
+    "corpo": null,
+    "status": 200,
+    "respostaCabecalhos": {
+      "content-type": "application/json",
+      "content-disposition": null
+    }
+  },
+  {
+    "tipo": "xhr",
+    "metodo": "POST",
+    "url": "/visproc/api/site-key",
+    "cabecalhos": {
+      "Accept": "application/json, text/plain, */*"
+    },
+    "corpo": null,
+    "status": 204,
+    "respostaCabecalhos": {
+      "content-type": null,
+      "content-disposition": null
+    }
+  },
+  {
+    "tipo": "xhr",
+    "metodo": "POST",
+    "url": "/visproc/api/consultarProcesso",
+    "cabecalhos": {
+      "Content-Type": "application/json;charset=UTF-8",
+      "ETag": "MC42LjY=",
+      "Authorization": "[REDIGIDO]",
+      "Accept": "application/json, text/plain, */*"
+    },
+    "corpo": "{\"codHash\":\"<codHash>\",\"tiposArquivo\":\"SD\",\"paginaInicial\":13000,\"paginaFinal\":13999}",
+    "status": 200,
+    "respostaCabecalhos": {
+      "content-type": "application/json",
+      "content-disposition": null
+    }
+  },
+  {
+    "tipo": "xhr",
+    "metodo": "POST",
+    "url": "/visproc/api/jwt-auth",
+    "cabecalhos": {
+      "Accept": "application/json, text/plain, */*"
+    },
+    "corpo": null,
+    "status": 200,
+    "respostaCabecalhos": {
+      "content-type": "application/json",
+      "content-disposition": null
+    }
+  },
+  {
+    "tipo": "xhr",
+    "metodo": "POST",
+    "url": "/visproc/api/site-key",
+    "cabecalhos": {
+      "Accept": "application/json, text/plain, */*"
+    },
+    "corpo": null,
+    "status": 204,
+    "respostaCabecalhos": {
+      "content-type": null,
+      "content-disposition": null
+    }
+  },
+  {
+    "tipo": "xhr",
+    "metodo": "POST",
+    "url": "/visproc/api/obterDocumento",
+    "cabecalhos": {
+      "Content-Type": "application/json;charset=UTF-8",
+      "ETag": "MC42LjY=",
+      "Authorization": "[REDIGIDO]",
+      "Accept": "application/json, text/plain, */*"
+    },
+    "corpo": "{\"codHash\":\"<codHash>\",\"codDoctoElet\":\"<codDoctoElet-48-hex-REDIGIDO>\",\"compact\":false}",
+    "status": 200,
+    "respostaCabecalhos": {
+      "content-type": "application/pdf",
+      "content-disposition": "inline; filename=\"<uuid-REDIGIDO>.pdf\""
+    }
+  },
+  {
+    "tipo": "xhr",
+    "metodo": "GET",
+    "url": "blob:https://www3.tjrj.jus.br/<uuid-REDIGIDO>",
+    "cabecalhos": {},
+    "corpo": null,
+    "status": 200,
+    "respostaCabecalhos": {
+      "content-type": "application/pdf",
+      "content-disposition": null
+    }
+  },
+  {
+    "tipo": "xhr",
+    "metodo": "POST",
+    "url": "/visproc/api/jwt-auth",
+    "cabecalhos": {
+      "Accept": "application/json, text/plain, */*"
+    },
+    "corpo": null,
+    "status": 200,
+    "respostaCabecalhos": {
+      "content-type": "application/json",
+      "content-disposition": null
+    }
+  },
+  {
+    "tipo": "xhr",
+    "metodo": "POST",
+    "url": "/visproc/api/site-key",
+    "cabecalhos": {
+      "Accept": "application/json, text/plain, */*"
+    },
+    "corpo": null,
+    "status": 204,
+    "respostaCabecalhos": {
+      "content-type": null,
+      "content-disposition": null
+    }
+  },
+  {
+    "tipo": "xhr",
+    "metodo": "POST",
+    "url": "/visproc/api/consultarProcesso",
+    "cabecalhos": {
+      "Content-Type": "application/json;charset=UTF-8",
+      "ETag": "MC42LjY=",
+      "Authorization": "[REDIGIDO]",
+      "Accept": "application/json, text/plain, */*"
+    },
+    "corpo": "{\"codHash\":\"<codHash>\",\"tiposArquivo\":\"DA\",\"paginaInicial\":1,\"paginaFinal\":5}",
+    "status": 200,
+    "respostaCabecalhos": {
+      "content-type": "application/json",
+      "content-disposition": null
+    }
+  },
+  {
+    "tipo": "xhr",
+    "metodo": "POST",
+    "url": "/visproc/api/jwt-auth",
+    "cabecalhos": {
+      "Accept": "application/json, text/plain, */*"
+    },
+    "corpo": null,
+    "status": 200,
+    "respostaCabecalhos": {
+      "content-type": "application/json",
+      "content-disposition": null
+    }
+  },
+  {
+    "tipo": "xhr",
+    "metodo": "POST",
+    "url": "/visproc/api/site-key",
+    "cabecalhos": {
+      "Accept": "application/json, text/plain, */*"
+    },
+    "corpo": null,
+    "status": 204,
+    "respostaCabecalhos": {
+      "content-type": null,
+      "content-disposition": null
+    }
+  },
+  {
+    "tipo": "xhr",
+    "metodo": "POST",
+    "url": "/visproc/api/consultarProcesso",
+    "cabecalhos": {
+      "Content-Type": "application/json;charset=UTF-8",
+      "ETag": "MC42LjY=",
+      "Authorization": "[REDIGIDO]",
+      "Accept": "application/json, text/plain, */*"
+    },
+    "corpo": "{\"codHash\":\"<codHash>\",\"tiposArquivo\":\"SA\",\"paginaInicial\":1,\"paginaFinal\":5}",
+    "status": 200,
+    "respostaCabecalhos": {
+      "content-type": "application/json",
+      "content-disposition": null
+    }
+  },
+  {
+    "tipo": "xhr",
+    "metodo": "POST",
+    "url": "/visproc/api/jwt-auth",
+    "cabecalhos": {
+      "Accept": "application/json, text/plain, */*"
+    },
+    "corpo": null,
+    "status": 200,
+    "respostaCabecalhos": {
+      "content-type": "application/json",
+      "content-disposition": null
+    }
+  },
+  {
+    "tipo": "xhr",
+    "metodo": "POST",
+    "url": "/visproc/api/site-key",
+    "cabecalhos": {
+      "Accept": "application/json, text/plain, */*"
+    },
+    "corpo": null,
+    "status": 204,
+    "respostaCabecalhos": {
+      "content-type": null,
+      "content-disposition": null
+    }
+  },
+  {
+    "tipo": "xhr",
+    "metodo": "POST",
+    "url": "/visproc/api/consultarProcesso",
+    "cabecalhos": {
+      "Content-Type": "application/json;charset=UTF-8",
+      "ETag": "MC42LjY=",
+      "Authorization": "[REDIGIDO]",
+      "Accept": "application/json, text/plain, */*"
+    },
+    "corpo": "{\"codHash\":\"<codHash>\",\"tiposArquivo\":\"SD\",\"paginaInicial\":1,\"paginaFinal\":5}",
+    "status": 200,
+    "respostaCabecalhos": {
+      "content-type": "application/json",
+      "content-disposition": null
+    }
+  },
+  {
+    "tipo": "xhr",
+    "metodo": "POST",
+    "url": "/visproc/api/jwt-auth",
+    "cabecalhos": {
+      "Accept": "application/json, text/plain, */*"
+    },
+    "corpo": null,
+    "status": 200,
+    "respostaCabecalhos": {
+      "content-type": "application/json",
+      "content-disposition": null
+    }
+  },
+  {
+    "tipo": "xhr",
+    "metodo": "POST",
+    "url": "/visproc/api/site-key",
+    "cabecalhos": {
+      "Accept": "application/json, text/plain, */*"
+    },
+    "corpo": null,
+    "status": 204,
+    "respostaCabecalhos": {
+      "content-type": null,
+      "content-disposition": null
+    }
+  },
+  {
+    "tipo": "xhr",
+    "metodo": "POST",
+    "url": "/visproc/api/consultarProcesso",
+    "cabecalhos": {
+      "Content-Type": "application/json;charset=UTF-8",
+      "ETag": "MC42LjY=",
+      "Authorization": "[REDIGIDO]",
+      "Accept": "application/json, text/plain, */*"
+    },
+    "corpo": "{\"codHash\":\"<codHash>\",\"numFolhas\":\"50\",\"tiposArquivo\":\"SD\"}",
+    "status": 200,
+    "respostaCabecalhos": {
+      "content-type": "application/json",
+      "content-disposition": null
+    }
+  },
+  {
+    "tipo": "xhr",
+    "metodo": "POST",
+    "url": "/visproc/api/jwt-auth",
+    "cabecalhos": {
+      "Accept": "application/json, text/plain, */*"
+    },
+    "corpo": null,
+    "status": 200,
+    "respostaCabecalhos": {
+      "content-type": "application/json",
+      "content-disposition": null
+    }
+  },
+  {
+    "tipo": "xhr",
+    "metodo": "POST",
+    "url": "/visproc/api/site-key",
+    "cabecalhos": {
+      "Accept": "application/json, text/plain, */*"
+    },
+    "corpo": null,
+    "status": 204,
+    "respostaCabecalhos": {
+      "content-type": null,
+      "content-disposition": null
+    }
+  },
+  {
+    "tipo": "xhr",
+    "metodo": "POST",
+    "url": "/visproc/api/consultarProcesso",
+    "cabecalhos": {
+      "Content-Type": "application/json;charset=UTF-8",
+      "ETag": "MC42LjY=",
+      "Authorization": "[REDIGIDO]",
+      "Accept": "application/json, text/plain, */*"
+    },
+    "corpo": "{\"codHash\":\"<codHash>\",\"numFolhas\":\"250\",\"tiposArquivo\":\"SD\"}",
+    "status": 200,
+    "respostaCabecalhos": {
+      "content-type": "application/json",
+      "content-disposition": null
+    }
+  },
+  {
+    "tipo": "xhr",
+    "metodo": "POST",
+    "url": "/visproc/api/jwt-auth",
+    "cabecalhos": {
+      "Accept": "application/json, text/plain, */*"
+    },
+    "corpo": null,
+    "status": 200,
+    "respostaCabecalhos": {
+      "content-type": "application/json",
+      "content-disposition": null
+    }
+  },
+  {
+    "tipo": "xhr",
+    "metodo": "POST",
+    "url": "/visproc/api/site-key",
+    "cabecalhos": {
+      "Accept": "application/json, text/plain, */*"
+    },
+    "corpo": null,
+    "status": 204,
+    "respostaCabecalhos": {
+      "content-type": null,
+      "content-disposition": null
+    }
+  },
+  {
+    "tipo": "xhr",
+    "metodo": "POST",
+    "url": "/visproc/api/consultarProcesso",
+    "cabecalhos": {
+      "Content-Type": "application/json;charset=UTF-8",
+      "ETag": "MC42LjY=",
+      "Authorization": "[REDIGIDO]",
+      "Accept": "application/json, text/plain, */*"
+    },
+    "corpo": "{\"codHash\":\"<codHash>\",\"tiposArquivo\":\"SD\",\"paginaInicial\":1,\"paginaFinal\":5}",
+    "status": 200,
+    "respostaCabecalhos": {
+      "content-type": "application/json",
+      "content-disposition": null
+    }
+  },
+  {
+    "tipo": "xhr",
+    "metodo": "POST",
+    "url": "/visproc/api/site-key",
+    "cabecalhos": {
+      "Accept": "application/json, text/plain, */*"
+    },
+    "corpo": null,
+    "status": 204,
+    "respostaCabecalhos": {
+      "content-type": null,
+      "content-disposition": null
+    }
+  },
+  {
+    "tipo": "xhr",
+    "metodo": "POST",
+    "url": "/downproc/api/download",
+    "cabecalhos": {
+      "Content-Type": "application/json;charset=UTF-8",
+      "ETag": "MC42LjY=",
+      "Authorization": "[REDIGIDO]",
+      "Accept": "application/json, text/plain, */*"
+    },
+    "corpo": "{\"codHash\":\"<codHash>\",\"compact\":true,\"tiposArquivo\":\"SD\",\"paginaInicial\":1,\"paginaFinal\":5}",
+    "status": 200,
+    "respostaCabecalhos": {
+      "content-type": "application/pdf",
+      "content-disposition": "attachment; filename=\"<CNJ-REDIGIDO-SEM-PONTUACAO>.pdf\""
+    }
+  },
+  {
+    "tipo": "xhr",
+    "metodo": "POST",
+    "url": "/visproc/api/site-key",
+    "cabecalhos": {
+      "Accept": "application/json, text/plain, */*"
+    },
+    "corpo": null,
+    "status": 204,
+    "respostaCabecalhos": {
+      "content-type": null,
+      "content-disposition": null
+    }
+  },
+  {
+    "tipo": "xhr",
+    "metodo": "POST",
+    "url": "/downproc/api/download",
+    "cabecalhos": {
+      "Content-Type": "application/json;charset=UTF-8",
+      "ETag": "MC42LjY=",
+      "Authorization": "[REDIGIDO]",
+      "Accept": "application/json, text/plain, */*"
+    },
+    "corpo": "{\"codHash\":\"<codHash>\",\"paginas\":[3],\"compact\":true,\"tiposArquivo\":\"SD\",\"paginaInicial\":1,\"paginaFinal\":5}",
+    "status": 200,
+    "respostaCabecalhos": {
+      "content-type": "application/pdf",
+      "content-disposition": "attachment; filename=\"<CNJ-REDIGIDO-SEM-PONTUACAO>.pdf\""
+    }
+  },
+  {
+    "tipo": "xhr",
+    "metodo": "POST",
+    "url": "/visproc/api/jwt-auth",
+    "cabecalhos": {
+      "Accept": "application/json, text/plain, */*"
+    },
+    "corpo": null,
+    "status": 200,
+    "respostaCabecalhos": {
+      "content-type": "application/json",
+      "content-disposition": null
+    }
+  },
+  {
+    "tipo": "xhr",
+    "metodo": "POST",
+    "url": "/visproc/api/site-key",
+    "cabecalhos": {
+      "Accept": "application/json, text/plain, */*"
+    },
+    "corpo": null,
+    "status": 204,
+    "respostaCabecalhos": {
+      "content-type": null,
+      "content-disposition": null
+    }
+  },
+  {
+    "tipo": "xhr",
+    "metodo": "POST",
+    "url": "/visproc/api/consultarProcesso",
+    "cabecalhos": {
+      "Content-Type": "application/json;charset=UTF-8",
+      "ETag": "MC42LjY=",
+      "Authorization": "[REDIGIDO]",
+      "Accept": "application/json, text/plain, */*"
+    },
+    "corpo": "{\"codHash\":\"<codHash>\",\"tiposArquivo\":\"SD\",\"paginaInicial\":1,\"paginaFinal\":1000}",
+    "status": 200,
+    "respostaCabecalhos": {
+      "content-type": "application/json",
+      "content-disposition": null
+    }
+  }
+]

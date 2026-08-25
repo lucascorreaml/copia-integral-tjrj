@@ -1,0 +1,30 @@
+# Bastidor do desenvolvimento. Ficam no disco, fora do repositorio publico.
+# Sao artefatos de conducao do trabalho, escritos na primeira pessoa e datados,
+# e nao fazem parte do produto nem da documentacao tecnica dele.
+CLAUDE.md
+PROMPT-CLAUDE-CODE.md
+COMECE-AQUI.md
+docs/INSTRUCOES-PROJECT.md
+docs/DOSSIE-COMPLETO.md
+
+# Material de processo NUNCA entra no repositório.
+# Estes padrões existem porque a extensão grava na pasta de Downloads, e um
+# arquivo arrastado para cá por engano viraria autos publicados no GitHub.
+*.pdf
+*_manifesto.json
+/autos/
+/downloads/
+
+# Ambiente
+node_modules/
+npm-debug.log*
+.env
+.env.*
+
+# Sistema operacional e editores
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp

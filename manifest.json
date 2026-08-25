@@ -1,0 +1,31 @@
+{
+  "manifest_version": 3,
+  "name": "Cópia Integral dos Autos — TJRJ",
+  "version": "1.1.0",
+  "description": "Copia integral de autos digitais do Visualizador de Processos Eletronicos do TJRJ, em lotes, dentro da sessao do proprio usuario. Somente leitura.",
+  "permissions": ["downloads", "storage"],
+  "host_permissions": ["https://www3.tjrj.jus.br/*"],
+  "background": {
+    "service_worker": "src/background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www3.tjrj.jus.br/visproc/*"],
+      "js": ["src/content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_title": "Copiar a integra dos autos do processo aberto",
+    "default_icon": {
+      "16": "icones/icone16.png",
+      "48": "icones/icone48.png",
+      "128": "icones/icone128.png"
+    }
+  },
+  "icons": {
+    "16": "icones/icone16.png",
+    "48": "icones/icone48.png",
+    "128": "icones/icone128.png"
+  }
+}

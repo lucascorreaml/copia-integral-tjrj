@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Cópia Integral dos Autos — TJRJ</title>
+<style>
+  :root {
+    --fundo: #ffffff; --texto: #1a1a1a; --suave: #666; --borda: #e2e2e2;
+    --caixa: #f7f7f7; --acento: #1e5aa8; --erro: #b3261e; --ok: #1b7a3d; --aviso: #8a6100;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --fundo: #16181c; --texto: #e8e8e8; --suave: #9aa0a6; --borda: #2c3038;
+      --caixa: #1e2127; --acento: #6fa8f5; --erro: #f2837a; --ok: #6cc48b; --aviso: #e0b356;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 32px 24px; background: var(--fundo); color: var(--texto);
+    font: 15px/1.55 -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  main { max-width: 860px; margin: 0 auto; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  .sub { color: var(--suave); font-size: 13px; margin-bottom: 24px; }
+  .caixa { background: var(--caixa); border: 1px solid var(--borda); border-radius: 10px; padding: 16px 18px; margin-bottom: 16px; }
+  .linha { display: flex; flex-wrap: wrap; gap: 24px; }
+  .dado { min-width: 120px; }
+  .dado .rot { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--suave); }
+  .dado .val { font-size: 20px; font-variant-numeric: tabular-nums; }
+  .barra { height: 8px; background: var(--borda); border-radius: 999px; overflow: hidden; margin-top: 14px; }
+  .barra > div { height: 100%; width: 0; background: var(--acento); transition: width .3s; }
+  button {
+    font: inherit; padding: 9px 18px; border-radius: 8px; border: 1px solid var(--borda);
+    background: var(--fundo); color: var(--texto); cursor: pointer;
+  }
+  button.principal { background: var(--acento); border-color: var(--acento); color: #fff; }
+  button:disabled { opacity: .45; cursor: not-allowed; }
+  .controles { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  label { font-size: 13px; color: var(--suave); }
+  input[type=number] {
+    font: inherit; width: 74px; padding: 7px 9px; border-radius: 7px;
+    border: 1px solid var(--borda); background: var(--fundo); color: var(--texto);
+  }
+  #registro {
+    font: 12.5px/1.6 ui-monospace, "Cascadia Mono", Consolas, monospace;
+    max-height: 320px; overflow-y: auto; white-space: pre-wrap; word-break: break-word;
+  }
+  .m-erro { color: var(--erro); }
+  .m-ok { color: var(--ok); }
+  .m-aviso { color: var(--aviso); }
+  .nota { font-size: 13px; color: var(--suave); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Cópia Integral dos Autos — TJRJ</h1>
+  <div class="sub">Baixa a íntegra dos autos em lotes, dentro da sua própria sessão autenticada.</div>
+
+  <div class="caixa" id="painelProcesso">
+    <div class="linha">
+      <div class="dado"><div class="rot">Processo</div><div class="val" id="vCnj">—</div></div>
+      <div class="dado"><div class="rot">Folhas</div><div class="val" id="vTotal">—</div></div>
+      <div class="dado"><div class="rot">Peças</div><div class="val" id="vPecas">—</div></div>
+      <div class="dado"><div class="rot">Lotes</div><div class="val" id="vLotes">—</div></div>
+      <div class="dado"><div class="rot">Erros</div><div class="val" id="vErros">0</div></div>
+    </div>
+    <div class="barra"><div id="progresso"></div></div>
+  </div>
+
+  <div class="caixa">
+    <div class="controles">
+      <button class="principal" id="btIniciar">Iniciar</button>
+      <button id="btPausar" disabled>Pausar</button>
+      <button id="btRelatorio" disabled>Salvar relatório</button>
+      <button id="btLimpar">Limpar progresso</button>
+      <span style="flex:1"></span>
+      <label>incluir
+        <select id="cfgTipos">
+          <option value="DA" selected>Documentos e anexos</option>
+          <option value="SD">Somente documentos</option>
+          <option value="SA">Somente anexos</option>
+        </select>
+      </label>
+      <label>peças por lote <input type="number" id="cfgLote" value="50" min="1" max="500"></label>
+      <label>intervalo (s) <input type="number" id="cfgIntervalo" value="8" min="2" max="120"></label>
+    </div>
+    <div class="nota" style="margin-top:12px">
+      O intervalo protege contra a limitação de taxa do servidor. Ao receber recusa por excesso,
+      a extensão para sozinha, espera cinco minutos e retoma com o intervalo dobrado.
+      Diminuí-lo é a forma mais fácil de quebrar o funcionamento.
+      <br><br>
+      Peças por lote define quantas peças entram em cada arquivo. Cinquenta é o valor verificado.
+      Acima disso, suba aos poucos e confira o registro.
+      <br><br>
+      Incluir define o que entra no download. <strong>Documentos e anexos</strong> é a íntegra dos autos
+      e é o que você quer na maioria dos casos. Somente documentos deixa os anexos de fora, e nesse modo
+      o aviso de contagem divergente é esperado, porque as folhas dos anexos continuam contando na
+      numeração ainda que os arquivos não venham.
+    </div>
+  </div>
+
+  <div class="caixa"><div id="registro"></div></div>
+</main>
+<script type="module" src="runner.js"></script>
+</body>
+</html>
