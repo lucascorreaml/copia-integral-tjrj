@@ -2,7 +2,7 @@
 
 Revisão completa do código depois da validação em produção. Feita sob o mesmo regime de evidência do resto do projeto: cada afirmação marcada, cada defeito reproduzido antes de corrigido, cada correção acompanhada de teste.
 
-Ponto de partida: 22 testes passando, execução real de 13.002 folhas sem erro. Ponto de chegada: 63 testes passando, sete defeitos corrigidos — dois deles faziam a extensão mentir sobre o próprio resultado — e a terceira camada de conferência, que a especificação previa e nunca havia sido construída.
+Ponto de partida: 22 testes passando, execução real de 13.002 folhas sem erro. Ponto de chegada: 67 testes passando, sete defeitos corrigidos — dois deles faziam a extensão mentir sobre o próprio resultado — e a terceira camada de conferência, que a especificação previa e nunca havia sido construída.
 
 ---
 
@@ -154,7 +154,17 @@ As duas decisões viraram funções puras em `src/lib/`, `lotes.js` e o novo `ri
 
 ---
 
-## 9. O que continua por verificar
+## 9. O defeito que a própria revisão introduziu
+
+A confirmação de gravação em disco da **RF-20** foi escrita sondando `chrome.downloads.search({ id })` e tratando lista vazia como falha. É corrida documentada da interface: logo após `download()` resolver, o gerenciador ainda pode não ter registrado o item. A extensão parou de funcionar em produção.
+
+Corrigido com carência de quinze segundos antes de a ausência virar erro, mais três defesas que faltavam: erro da própria chamada de busca não derruba lote já baixado, o nome do arquivo tem formato de reserva caso o Chrome recuse o legível, e a página ganhou um vigia de erros carregado antes do módulo principal, para que falha de carregamento apareça na tela em vez de deixar botões mudos. O relato completo é o oitavo item de [`ERROS-E-DESCOBERTAS.md`](ERROS-E-DESCOBERTAS.md).
+
+**A lição.** Trava de segurança é código novo, e código novo quebra o que funcionava. Precisa de caminho de degradação, e não só de caminho de erro. As camadas 2 e 3 da conferência nascem como advertência por isso; esta nasceu como erro, e foi a única que derrubou a ferramenta.
+
+---
+
+## 10. O que continua por verificar
 
 Nada aqui pode ser medido sem a sessão autenticada do tribunal, que é do usuário.
 

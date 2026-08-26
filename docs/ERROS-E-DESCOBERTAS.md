@@ -4,7 +4,7 @@ Cada item aqui é um erro que parecia óbvio na direção contrária, e que volt
 
 É a leitura obrigatória de quem for alterar este código.
 
-Os seis primeiros são do levantamento e da implementação. O sétimo veio da revisão de código posterior, e o relato longo dele está em [`REVISAO.md`](REVISAO.md).
+Os seis primeiros são do levantamento e da implementação. O sétimo veio da revisão de código posterior, e o relato longo dele está em [`REVISAO.md`](REVISAO.md). O oitavo foi cometido **pela própria revisão**, e está aqui porque é o mais instrutivo de todos: uma trava de segurança mal escrita derrubou uma ferramenta que funcionava.
 
 ---
 
@@ -76,11 +76,30 @@ Os seis primeiros são do levantamento e da implementação. O sétimo veio da r
 
 **Como o código se protege hoje.** `conciliacao.js` responde ao veredito comparando `estado.declaradas` com `estado.vistos`, e exige as três condições ao mesmo tempo: todas as janelas varridas, nenhuma peça declarada faltando, nenhum lote em erro ainda pendente. Nenhuma contagem de lote decide isso. Além disso, `processarLote` passou a ter saída única de falha, de modo que não existe caminho que desista de um lote sem gravar registro e escrever linha na tela. Os testes `T-08` cobrem os dois sentidos do erro.
 
+## 8. Tratar corrida de API como falha
+
+**O erro.** A revisão acrescentou uma confirmação de que o arquivo chegou ao disco, sondando `chrome.downloads.search({ id })` logo depois de `chrome.downloads.download()` resolver, e tratando lista vazia como falha:
+
+```js
+const [item] = await chrome.downloads.search({ id });
+if (!item) throw new Error('o Chrome não registrou este download');
+```
+
+**Como apareceu.** A extensão parou de funcionar em produção, com o Chrome acusando falha de download. A busca na documentação e nos rastreadores de defeito do Chromium e do Firefox confirmou: **`downloads.search` chamado logo após `download` resolver pode devolver lista vazia**, porque o gerenciador de downloads ainda não registrou o item. É corrida conhecida da interface, não defeito do navegador do usuário.
+
+**Por que o estrago foi maior que o defeito.** A ausência derrubava o lote na primeira sondagem. O lote então repetia, e cada repetição disparava um download novo do mesmo arquivo, o que fazia o próprio Chrome acusar falha. Três tentativas depois, o lote era dado por perdido. Uma verificação criada para impedir falha silenciosa produziu falha ruidosa.
+
+**A verdade.** Confirmação de estado assíncrono precisa de carência. Ausência momentânea não é ausência definitiva, e a diferença entre as duas é tempo.
+
+**Como o código se protege hoje.** A ausência só vira erro depois de quinze segundos de carência, e erro da própria chamada de busca não derruba lote já baixado. Além disso, o nome do arquivo passou a ter um formato de reserva: se o Chrome recusar o nome legível, a extensão cai para o formato conservador que rodou 364 MB sem um único erro, e diz no registro que fez isso. E a página de execução ganhou um vigia de erros carregado antes do módulo principal, para que falha de carregamento apareça na tela em vez de deixar botões mudos.
+
+**A lição que vale para o projeto.** Toda trava nova é código novo, e código novo pode quebrar o que funcionava. Trava de segurança precisa de caminho de degradação, e não só de caminho de erro. As camadas 2 e 3 da conferência já nascem como advertência por essa razão; esta nasceu como erro, e foi a única que derrubou a ferramenta.
+
 ---
 
 ## O padrão que liga todos eles
 
-Cinco dos sete são a mesma coisa dita de maneiras diferentes: **o sistema falha sem avisar, e a aparência de sucesso é indistinguível do sucesso.**
+Cinco dos oito são a mesma coisa dita de maneiras diferentes: **o sistema falha sem avisar, e a aparência de sucesso é indistinguível do sucesso.**
 
 Código inválido devolve 200 com PDF de 941 bytes. Limitação de taxa devolve 200 com PDF de 941 bytes. Extensão de peça calculada errado produz número absurdo que ninguém confere. Diário de lotes vazio parece execução limpa. Janela truncada parece janela sem novidade.
 

@@ -8,7 +8,7 @@ import {
   achatar, totalDeFolhas, montarJanelas, pecasDaJanela,
   removerJaVistas, calcularExtensoes, ordenar
 } from './lib/indexador.js';
-import { particionar, nomeArquivo, nomeManifesto } from './lib/lotes.js';
+import { particionar, nomeArquivo, nomeArquivoConservador, nomeManifesto, limparCnj } from './lib/lotes.js';
 import { proximoIntervalo, intervaloInicial, houveEstrangulamento } from './lib/ritmo.js';
 import { verificarLote } from './lib/conferencia.js';
 import { carregar, salvar, apagar, estadoNovo } from './lib/estado.js';
@@ -176,13 +176,31 @@ function declararPecas(pecas) {
 
 // ------------------------------------------------------------------- salvar
 
-async function salvarPdf(bytes, caminho, bytesEsperados) {
+/**
+ * Grava o lote em disco.
+ *
+ * Se o Chrome recusar o nome legivel, cai para o nome conservador, que e o
+ * formato que rodou 364 MB em 22 lotes sem um unico erro. Nome bonito nao vale
+ * um download perdido.
+ */
+async function salvarPdf(bytes, caminho, alternativo, bytesEsperados) {
   const url = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' }));
   try {
-    const id = await chrome.downloads.download({
-      url, filename: caminho, saveAs: false, conflictAction: 'uniquify'
-    });
-    return await confirmarGravacao(id, bytesEsperados);
+    let usado = caminho;
+    let id;
+    try {
+      id = await chrome.downloads.download({
+        url, filename: caminho, saveAs: false, conflictAction: 'uniquify'
+      });
+    } catch (e) {
+      reg(`o Chrome recusou o nome "${caminho}" (${e.message}). Tentando com o nome simples.`, 'm-aviso');
+      usado = alternativo;
+      id = await chrome.downloads.download({
+        url, filename: alternativo, saveAs: false, conflictAction: 'uniquify'
+      });
+    }
+    const gravacao = await confirmarGravacao(id, bytesEsperados);
+    return { ...gravacao, caminho: usado };
   } finally {
     setTimeout(() => URL.revokeObjectURL(url), 120000);
   }
@@ -193,18 +211,42 @@ async function salvarPdf(bytes, caminho, bytesEsperados) {
  * Sem esperar o estado final, disco cheio, antivirus ou interrupcao deixariam o
  * lote registrado como concluido no manifesto sem arquivo nenhum na pasta.
  *
+ * ARMADILHA, e ela ja custou uma versao quebrada: `downloads.search` chamado
+ * logo depois de `download` resolver pode devolver lista VAZIA, porque o
+ * gerenciador de downloads ainda nao registrou o item. E corrida documentada.
+ * Tratar a lista vazia como falha derruba o lote na primeira sondagem, e a
+ * tentativa seguinte dispara outro download, o que faz o proprio Chrome
+ * acusar falha. Por isso a ausencia so vira erro depois da carencia abaixo.
+ *
  * A interrupcao e causa de erro, porque e definitiva. A divergencia de bytes e
  * apenas advertencia: [A VERIFICAR] se bytesReceived de um download vindo de
- * blob acompanha sempre o tamanho do blob. Enquanto isso nao for medido, ela
- * nao pode barrar arquivo de uma ferramenta que funciona.
+ * blob acompanha sempre o tamanho do blob.
  */
 async function confirmarGravacao(id, bytesEsperados) {
   const PASSO = 500;
+  const CARENCIA_REGISTRO_MS = 15000;
+  let semRegistro = 0;
+
   for (let esperou = 0; esperou <= LIMITE_GRAVACAO_MS; esperou += PASSO) {
-    const [item] = await chrome.downloads.search({ id });
-    if (!item) throw new Error('o Chrome não registrou este download');
+    let item = null;
+    try {
+      [item] = await chrome.downloads.search({ id });
+    } catch (_) {
+      item = null;   // hiccup da API nao pode derrubar um lote ja baixado
+    }
+
+    if (!item) {
+      semRegistro += PASSO;
+      if (semRegistro >= CARENCIA_REGISTRO_MS) {
+        throw new Error(`o Chrome não registrou este download em ${CARENCIA_REGISTRO_MS / 1000} s`);
+      }
+      await dormir(PASSO);
+      continue;
+    }
+    semRegistro = 0;
+
     if (item.state === 'interrupted') {
-      throw new Error(`o Chrome interrompeu a gravação: ${item.error || 'motivo não informado'}`);
+      throw new Error(`o Chrome interrompeu a gravação, motivo "${item.error || 'não informado'}"`);
     }
     if (item.state === 'complete') {
       const aviso = (Number.isFinite(bytesEsperados) && Number.isFinite(item.bytesReceived)
@@ -226,11 +268,20 @@ async function confirmarGravacao(id, bytesEsperados) {
 async function salvarRelatorio() {
   if (!relatorio) return;
   const url = URL.createObjectURL(new Blob([JSON.stringify(relatorio, null, 2)], { type: 'application/json' }));
-  await chrome.downloads.download({
-    url, filename: nomeManifesto(estado.cnj), saveAs: false, conflictAction: 'uniquify'
-  });
+  try {
+    await chrome.downloads.download({
+      url, filename: nomeManifesto(estado.cnj), saveAs: false, conflictAction: 'uniquify'
+    });
+    reg('manifesto salvo na pasta do processo', 'm-ok');
+  } catch (e) {
+    reg(`o Chrome recusou o nome do manifesto (${e.message}). Salvando com nome simples.`, 'm-aviso');
+    const pasta = limparCnj(estado.cnj);
+    await chrome.downloads.download({
+      url, filename: `${pasta}/${pasta}_manifesto.json`, saveAs: false, conflictAction: 'uniquify'
+    });
+    reg('manifesto salvo na pasta do processo', 'm-ok');
+  }
   setTimeout(() => URL.revokeObjectURL(url), 60000);
-  reg('manifesto salvo na pasta do processo', 'm-ok');
 }
 
 // ------------------------------------------------------------------ execucao
@@ -518,7 +569,8 @@ async function processarLote(lote, vistos) {
       // dois registros do manifesto compartilharem o mesmo numero.
       const seq = estado.sequencial + 1;
       const caminho = nomeArquivo(estado.cnj, seq, lote.folhaInicial, lote.folhaFinal);
-      const gravacao = await salvarPdf(bytes, caminho, r.bytes);
+      const reserva = nomeArquivoConservador(estado.cnj, seq, lote.folhaInicial, lote.folhaFinal);
+      const gravacao = await salvarPdf(bytes, caminho, reserva, r.bytes);
       estado.sequencial = seq;
       if (gravacao.aviso) {
         conf.avisos.push(gravacao.aviso);
@@ -528,7 +580,7 @@ async function processarLote(lote, vistos) {
       for (const p of lote.pecas) vistos.add(p.codDoctoElet);
       estado.vistos = [...vistos];
       estado.lotes.push({
-        sequencial: seq, situacao: 'concluido', caminho, nomeGravado: gravacao.nome,
+        sequencial: seq, situacao: 'concluido', caminho: gravacao.caminho, nomeGravado: gravacao.nome,
         janela: lote.janela, folhaInicial: lote.folhaInicial, folhaFinal: lote.folhaFinal,
         pecas: lote.pecas.map(p => ({ folha: p.folha, rotulo: p.rotulo, codDoctoElet: p.codDoctoElet, paginas: p.paginas })),
         paginasEsperadas: lote.paginasEsperadas, paginasLidas: conf.paginasLidas,
@@ -542,7 +594,7 @@ async function processarLote(lote, vistos) {
         bytes: r.bytes, ms: r.ms, avisos: conf.avisos
       });
       await salvarEstado();
-      reg(`${rotulo}: salvo como ${gravacao.nome || caminho}, ${(r.bytes / 1048576).toFixed(2)} MB em ${(r.ms / 1000).toFixed(1)} s`, 'm-ok');
+      reg(`${rotulo}: salvo como ${gravacao.nome || gravacao.caminho}, ${(r.bytes / 1048576).toFixed(2)} MB em ${(r.ms / 1000).toFixed(1)} s`, 'm-ok');
       pintar();
       return true;
 
@@ -629,6 +681,23 @@ function montarRelatorio(veredito) {
 el('btIniciar').addEventListener('click', () => { if (!rodando) executar(); });
 el('btPausar').addEventListener('click', () => { pausaPedida = true; reg('pausa pedida, encerrando após o lote atual', 'm-aviso'); });
 el('btRelatorio').addEventListener('click', () => salvarRelatorio());
+// Diagnostico a distancia: quem carrega a extensao e reporta o resultado e o
+// usuario, e pedir para ele transcrever o registro a mao seria pedir erro.
+el('btCopiar').addEventListener('click', async () => {
+  const texto = el('registro').innerText;
+  try {
+    await navigator.clipboard.writeText(texto);
+    reg('registro copiado. Cole onde precisar.', 'm-ok');
+  } catch (_) {
+    const caixa = document.createElement('textarea');
+    caixa.value = texto;
+    document.body.appendChild(caixa);
+    caixa.select();
+    document.execCommand('copy');
+    caixa.remove();
+    reg('registro copiado. Cole onde precisar.', 'm-ok');
+  }
+});
 el('btLimpar').addEventListener('click', async () => {
   if (rodando) { reg('pare a execução antes de limpar o progresso', 'm-aviso'); return; }
   if (!ctx || !ctx.codHash) { reg('nada para limpar ainda'); return; }

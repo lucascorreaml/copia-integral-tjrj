@@ -60,7 +60,7 @@ lib/            as decisões, puras e testadas fora do navegador
 npm test
 ```
 
-63 testes das funções puras. Não precisa de Chrome, de rede nem de acesso ao tribunal.
+67 testes das funções puras. Não precisa de Chrome, de rede nem de acesso ao tribunal.
 
 Regras para qualquer alteração:
 

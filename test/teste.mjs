@@ -2,7 +2,7 @@ import {
   achatar, totalDeFolhas, montarJanelas, pecasDaJanela,
   removerJaVistas, calcularExtensoes, ordenar
 } from '../src/lib/indexador.js';
-import { particionar, nomeArquivo, nomeManifesto, limparCnj } from '../src/lib/lotes.js';
+import { particionar, nomeArquivo, nomeArquivoConservador, nomeManifesto, nomeSeguro, limparCnj } from '../src/lib/lotes.js';
 import { proximoIntervalo, intervaloInicial, houveEstrangulamento } from '../src/lib/ritmo.js';
 import { verificarLote, parecePdf, contarPaginas, pisoDeBytes } from '../src/lib/conferencia.js';
 import {
@@ -185,6 +185,27 @@ teste('o manifesto acompanha o mesmo padrao', () => {
 teste('cnj ausente nao quebra a nomeacao', () => {
   igual(limparCnj(null), 'processo');
   igual(nomeArquivo(null, 1, 1, 2), 'processo/processo - fls 00001 a 00002 - Parte 001.pdf');
+});
+teste('caractere que o Windows recusa e removido do nome', () => {
+  // Nome recusado pelo sistema de arquivos vira download interrompido, que e
+  // exatamente o que o usuario ve como "Failed".
+  igual(nomeSeguro('Peticao: parte 1/2 <urgente>?'), 'Peticao parte 1 2 urgente');
+  igual(nomeSeguro('  espacos nas pontas  '), 'espacos nas pontas');
+  igual(nomeSeguro('termina com ponto.'), 'termina com ponto');
+  igual(nomeSeguro(''), 'arquivo');
+});
+teste('nome reservado do Windows nao passa cru', () => {
+  igual(nomeSeguro('CON.pdf'), '_CON.pdf');
+  igual(nomeSeguro('nul'), '_nul');
+});
+teste('nome longo e cortado sem perder a extensao', () => {
+  const r = nomeSeguro('x'.repeat(300) + '.pdf', 120);
+  igual(r.length, 120);
+  verdade(r.endsWith('.pdf'), 'a extensao tem que sobreviver ao corte');
+});
+teste('o nome conservador reproduz o formato que rodou 364 MB sem erro', () => {
+  igual(nomeArquivoConservador('1234567-89.2020.8.19.0001', 7, 974, 1040),
+    '12345678920208190001/12345678920208190001_007_974-1040.pdf');
 });
 
 console.log('\nT-18  ritmo entre operacoes');
