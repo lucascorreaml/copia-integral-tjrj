@@ -169,7 +169,14 @@ FIM
 
 **RF-10b.** Ao receber status 429, interromper a execução, aguardar no mínimo cinco minutos e retomar com o intervalo dobrado. **Nunca insistir em ritmo igual ou maior.**
 
-**RF-11.** Salvar cada lote com nome próprio, no formato `<cnj-sem-pontuacao>_<sequencial-com-zeros>_<folhaInicial>-<folhaFinal>.pdf`, em subpasta nomeada pelo número do processo.
+**RF-11.** Salvar cada lote com nome próprio, em subpasta nomeada pelo número do processo, no formato:
+
+```
+<cnj-sem-pontuacao> - fls <inicial> a <final> - Parte <sequencial>.pdf
+12345678920208190001 - fls 00974 a 01040 - Parte 003.pdf
+```
+
+Três decisões, cada uma com um motivo prático. **O processo vem na frente** porque arquivo arrastado para fora da pasta, para um e-mail ou para a pasta de outro caso, precisa continuar dizendo de que processo é, e não pode colidir com a Parte 001 de outro processo. **As folhas levam zeros à esquerda** porque a ordenação do explorador de arquivos é alfabética, e sem eles a folha 1000 viria antes da folha 999. **A palavra "Parte" existe** porque parede de dígito não se lê: o sequencial sozinho vira mais um número no meio de vinte outros. O manifesto segue o mesmo padrão, `<cnj> - manifesto.json`, para ficar junto na ordenação.
 
 **RF-12.** Gravar, ao lado dos arquivos, um manifesto em JSON contendo, por lote, a lista de folhas pedidas, os rótulos das peças, o tamanho do arquivo, o tempo de resposta e o resultado da conferência.
 
@@ -220,6 +227,8 @@ Todos nascem de defeito encontrado por leitura e reproduzido em simulação, e c
 `[OBSERVADO]` No RECON seção 5: o PDF não possui `/PageLabels`, e a numeração dos autos viaja nos marcadores, cujos títulos reproduzem os rótulos da árvore. No teste de cinquenta peças, a lista de marcadores reproduziu a lista pedida sem omissão, substituição nem reordenação.
 
 **RF-27b, e este limite é deliberado.** A Camada 3 é **advertência, nunca rejeição**, e não entra no veredito de `completo`. O leitor de marcadores nunca foi exercitado contra um PDF real do tribunal, produzido por iText 7.2.6. Barrar arquivo com base numa leitura não medida seria trocar uma ferramenta que funciona por uma suposição. O resultado por lote vai para o manifesto, em `lotes[].marcadores`, e o resumo para `conferencia.marcadores`, justamente para permitir a medição que autoriza a promoção a trava dura.
+
+**RF-28.** A extensão avisa, uma vez por execução, quando o navegador está esticando as pausas por a aba estar em segundo plano. `[OBSERVADO]` no RECON, apêndice A.5. Não corrompe resultado e no limite reduz a pressão sobre o serviço, mas execução que se arrasta sem explicação parece travada, e o usuário a interrompe achando que deu errado. O critério é desvio de mais de cinquenta por cento **e** de pelo menos três segundos, porque o fator sozinho transformaria ruído normal de temporizador em alarme.
 
 **RF-27c.** A leitura não usa dependência externa: a descompressão é feita por `DecompressionStream`, que é API nativa. Só fluxos marcados como `/ObjStm` são inflados, porque dicionário de marcador ou está solto no arquivo, e o texto cru já o traz, ou está dentro de fluxo de objetos. `[OBSERVADO, por sonda]` inflar tudo significaria descomprimir centenas de megabytes de imagem de página, em `JBIG2Decode` e `JPXDecode`, para não achar nada.
 
@@ -313,6 +322,7 @@ copia-integral-tjrj/
 │       ├── conferencia.js     travas de integridade do arquivo recebido
 │       ├── marcadores.js      leitura dos marcadores do PDF, a Camada 3
 │       ├── conciliacao.js     veredito sobre a integralidade da execução
+│       ├── ritmo.js           intervalo entre operações e recuo após recusa
 │       └── estado.js          persistência para retomada
 ├── test/                      amostras e testes das funções puras, rodam em Node
 ├── icones/

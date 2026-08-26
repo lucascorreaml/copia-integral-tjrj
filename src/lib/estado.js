@@ -36,10 +36,3 @@ export function estadoNovo(codHash, cnj, total, tiposArquivo) {
     intervaloEfetivoMs: null  // intervalo aprendido apos limitacao de taxa
   };
 }
-
-export async function listarProcessos() {
-  const tudo = await chrome.storage.local.get(null);
-  return Object.entries(tudo)
-    .filter(([k]) => k.startsWith(PREFIXO))
-    .map(([, v]) => v);
-}

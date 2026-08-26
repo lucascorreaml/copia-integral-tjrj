@@ -32,7 +32,15 @@ Trocar essa opção no meio de um processo já iniciado muda a árvore inteira e
 
 **Intervalo**, valor inicial 8 segundos. Pausa entre operações. O servidor do tribunal recusa quem pede rápido demais, e essa recusa é silenciosa: ele passa a devolver arquivos vazios que parecem válidos. Oito segundos foi o intervalo verificado como seguro. **Diminuir esse número é a maneira mais fácil de quebrar tudo.**
 
-Os arquivos caem na sua pasta de Downloads, dentro de uma subpasta com o número do processo, nomeados na sequência das folhas. No fim, um arquivo `_manifesto.json` registra o que foi baixado, peça por peça.
+Os arquivos caem na sua pasta de Downloads, dentro de uma subpasta com o número do processo, assim:
+
+```
+12345678920208190001 - fls 00001 a 00489 - Parte 001.pdf
+12345678920208190001 - fls 00490 a 00973 - Parte 002.pdf
+12345678920208190001 - fls 00974 a 01040 - Parte 003.pdf
+```
+
+O número do processo vem na frente de propósito: se você arrastar um desses arquivos para um e-mail ou para a pasta de outro caso, ele continua dizendo de onde veio, e não se confunde com a Parte 001 de outro processo. Os zeros à esquerda também são de propósito, para a ordem alfabética da pasta coincidir com a ordem das folhas. No fim, um arquivo `- manifesto.json` registra o que foi baixado, peça por peça.
 
 ---
 
@@ -50,7 +58,9 @@ Além disso, cada PDF é conferido contra os próprios marcadores, que são o í
 
 ## Enquanto estiver rodando
 
-A aba de controle pode ficar em segundo plano e você pode usar o computador normalmente. Saiba, porém, que o Chrome estica os temporizadores de abas ocultas, e por isso a pausa entre lotes pode ficar maior do que os oito segundos configurados. A execução continua correta, só demora mais. Se quiser velocidade previsível, deixe a aba de controle visível, numa segunda janela ao lado.
+A aba de controle pode ficar em segundo plano e você pode usar o computador normalmente. Saiba, porém, que o Chrome estica os temporizadores de abas ocultas, e por isso a pausa entre lotes pode ficar maior do que os oito segundos configurados. A execução continua correta, só demora mais.
+
+Não precisa ficar conferindo: **a extensão percebe e avisa**. Se aparecer no registro uma linha dizendo que o Chrome está esticando as pausas, é isso, e não é defeito. Se quiser velocidade previsível, deixe a aba de controle visível, numa segunda janela ao lado.
 
 O computador não pode hibernar no meio. Em execução longa com você longe da máquina, confira as configurações de energia do Windows.
 

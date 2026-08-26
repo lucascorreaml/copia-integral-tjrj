@@ -8,7 +8,8 @@ import {
   achatar, totalDeFolhas, montarJanelas, pecasDaJanela,
   removerJaVistas, calcularExtensoes, ordenar
 } from './lib/indexador.js';
-import { particionar, nomeArquivo, limparCnj } from './lib/lotes.js';
+import { particionar, nomeArquivo, nomeManifesto } from './lib/lotes.js';
+import { proximoIntervalo, intervaloInicial, houveEstrangulamento } from './lib/ritmo.js';
 import { verificarLote } from './lib/conferencia.js';
 import { carregar, salvar, apagar, estadoNovo } from './lib/estado.js';
 import { registrarErro, errosPendentes, conciliar, janelaVaziaEhLegitima } from './lib/conciliacao.js';
@@ -16,7 +17,6 @@ import { conferir as conferirMarcadoresDoLote } from './lib/marcadores.js';
 
 const ESPERA_APOS_LIMITE_MS = 5 * 60 * 1000;
 const MAX_TENTATIVAS = 3;
-const INTERVALO_MAXIMO_MS = 120000;
 const LIMITE_GRAVACAO_MS = 120000;
 
 // DA = documentos e anexos, SD = somente documentos, SA = somente anexos.
@@ -39,6 +39,7 @@ let tiposArquivo = 'DA';
 let relatorio = null;
 let declaradasConhecidas = new Set();
 let totalMudou = false;
+let avisouEstrangulamento = false;
 
 // ------------------------------------------------------------------ registro
 
@@ -95,14 +96,37 @@ const dormir = (ms) => new Promise(r => setTimeout(r, ms));
  * Espera longa que atende o botao Pausar. A espera de cinco minutos do limite
  * de requisicoes ficaria surda ao usuario se dormisse de uma vez so.
  * Devolve false quando foi interrompida.
+ *
+ * Aproveita para medir o tempo que realmente passou, porque o Chrome estica
+ * temporizador de aba em segundo plano e uma execucao que se arrasta sem
+ * explicacao parece travada.
  */
 async function dormirAtento(ms) {
   const FATIA = 1000;
+  const inicio = Date.now();
   for (let passou = 0; passou < ms; passou += FATIA) {
     if (pausaPedida) return false;
     await dormir(Math.min(FATIA, ms - passou));
   }
+  notarAtraso(ms, Date.now() - inicio);
   return !pausaPedida;
+}
+
+/**
+ * Avisa UMA vez que o navegador esta esticando as pausas.
+ * `[OBSERVADO]` no RECON, apendice A.5. Nao corrompe resultado, e no limite ate
+ * reduz a pressao sobre o servico, mas precisa constar da tela.
+ */
+function notarAtraso(pedido, real) {
+  if (avisouEstrangulamento || !houveEstrangulamento(pedido, real)) return;
+  avisouEstrangulamento = true;
+  reg(
+    `esta aba está em segundo plano e o Chrome está esticando as pausas: ` +
+    `pedi ${Math.round(pedido / 1000)} s de intervalo e passaram ${Math.round(real / 1000)} s. ` +
+    'A execução continua correta, só mais devagar, e a pressão sobre o servidor do tribunal fica menor. ' +
+    'Se quiser velocidade previsível, deixe esta aba visível numa segunda janela ao lado.',
+    'm-aviso'
+  );
 }
 
 // ------------------------------------------------------------------- estado
@@ -202,9 +226,8 @@ async function confirmarGravacao(id, bytesEsperados) {
 async function salvarRelatorio() {
   if (!relatorio) return;
   const url = URL.createObjectURL(new Blob([JSON.stringify(relatorio, null, 2)], { type: 'application/json' }));
-  const pasta = limparCnj(estado.cnj);
   await chrome.downloads.download({
-    url, filename: `${pasta}/${pasta}_manifesto.json`, saveAs: false, conflictAction: 'uniquify'
+    url, filename: nomeManifesto(estado.cnj), saveAs: false, conflictAction: 'uniquify'
   });
   setTimeout(() => URL.revokeObjectURL(url), 60000);
   reg('manifesto salvo na pasta do processo', 'm-ok');
@@ -216,6 +239,7 @@ async function executar() {
   rodando = true;
   pausaPedida = false;
   totalMudou = false;
+  avisouEstrangulamento = false;
   el('btIniciar').disabled = true;
   el('btPausar').disabled = false;
   intervaloMs = Math.max(2, Number(el('cfgIntervalo').value) || 8) * 1000;
@@ -246,8 +270,10 @@ async function executar() {
     }
     // O intervalo aprendido depois de um 429 sobrevive ao fechamento do
     // navegador. Voltar ao valor da tela repetiria o erro que ja custou espera.
-    if (anterior && anterior.intervaloEfetivoMs > intervaloMs) {
-      intervaloMs = Math.min(anterior.intervaloEfetivoMs, INTERVALO_MAXIMO_MS);
+    const aprendido = anterior ? anterior.intervaloEfetivoMs : null;
+    const inicial = intervaloInicial(intervaloMs, aprendido);
+    if (inicial > intervaloMs) {
+      intervaloMs = inicial;
       reg(`a execução anterior teve que subir o intervalo para ${intervaloMs / 1000} s. Começando por esse valor.`, 'm-aviso');
     }
 
@@ -258,7 +284,7 @@ async function executar() {
       reg(`consultando índice das folhas ${janela.paginaInicial} a ${janela.paginaFinal}`);
       const bruto = await pedir('indice', { codHash: ctx.codHash, etag: ctx.etag, tiposArquivo, ...janela });
       indices.set(c, bruto);
-      await dormir(intervaloMs);
+      await dormirAtento(intervaloMs);
       return bruto;
     }
 
@@ -523,7 +549,7 @@ async function processarLote(lote, vistos) {
     } catch (e) {
       ultimoErro = e;
       if (e.limitado) {
-        intervaloMs = Math.min(intervaloMs * 2, INTERVALO_MAXIMO_MS);
+        intervaloMs = proximoIntervalo(intervaloMs);
         estado.intervaloEfetivoMs = intervaloMs;
         reg(`${rotulo}: limite de requisições atingido. Esperando cinco minutos e dobrando o intervalo para ${intervaloMs / 1000} s.`, 'm-aviso');
         try { await salvarEstado(); } catch (_) { /* nao pode mascarar o erro do lote */ }

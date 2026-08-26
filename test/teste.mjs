@@ -2,7 +2,8 @@ import {
   achatar, totalDeFolhas, montarJanelas, pecasDaJanela,
   removerJaVistas, calcularExtensoes, ordenar
 } from '../src/lib/indexador.js';
-import { particionar, nomeArquivo, limparCnj } from '../src/lib/lotes.js';
+import { particionar, nomeArquivo, nomeManifesto, limparCnj } from '../src/lib/lotes.js';
+import { proximoIntervalo, intervaloInicial, houveEstrangulamento } from '../src/lib/ritmo.js';
 import { verificarLote, parecePdf, contarPaginas, pisoDeBytes } from '../src/lib/conferencia.js';
 import {
   registrarErro, errosPendentes, pecasFaltantes, janelaVaziaEhLegitima, conciliar
@@ -156,13 +157,59 @@ teste('assinatura de PDF', () => {
   igual(contarPaginas(pdfFalso(3, 20000)), 3);
 });
 
-console.log('\nNomeacao de arquivos');
-teste('nome com subpasta, sequencial com zeros e faixa de folhas', () => {
+console.log('\nT-17  nomeacao dos arquivos de saida');
+teste('processo na frente, folhas no meio, Parte no fim', () => {
   // Numero sintetico. Nenhum processo real entra no repositorio.
   igual(nomeArquivo('1234567-89.2020.8.19.0001', 7, 974, 1040),
-    '12345678920208190001/12345678920208190001_007_974-1040.pdf');
+    '12345678920208190001/12345678920208190001 - fls 00974 a 01040 - Parte 007.pdf');
 });
-teste('cnj ausente nao quebra a nomeacao', () => igual(limparCnj(null), 'processo'));
+teste('as folhas levam zeros a esquerda, para ordenar certo fora da pasta', () => {
+  const nomes = [[1, 489], [974, 1040], [12001, 13002]]
+    .map(([a, b], i) => nomeArquivo('1234567-89.2020.8.19.0001', i + 1, a, b).split('/')[1]);
+  igual(nomes.map(n => n.slice(0, 21).trim()), ['12345678920208190001', '12345678920208190001', '12345678920208190001']);
+  verdade(nomes[0].includes('fls 00001 a 00489'));
+  verdade(nomes[2].includes('fls 12001 a 13002'));
+  // ordenacao alfabetica tem que coincidir com a ordem das folhas
+  igual([...nomes].sort(), nomes);
+});
+teste('folha acima de cinco digitos nao e truncada', () => {
+  verdade(nomeArquivo('1', 1, 100000, 123456).includes('fls 100000 a 123456'));
+});
+teste('parte passa de cem sem quebrar', () => {
+  verdade(nomeArquivo('1', 137, 1, 2).includes('Parte 137'));
+});
+teste('o manifesto acompanha o mesmo padrao', () => {
+  igual(nomeManifesto('1234567-89.2020.8.19.0001'),
+    '12345678920208190001/12345678920208190001 - manifesto.json');
+});
+teste('cnj ausente nao quebra a nomeacao', () => {
+  igual(limparCnj(null), 'processo');
+  igual(nomeArquivo(null, 1, 1, 2), 'processo/processo - fls 00001 a 00002 - Parte 001.pdf');
+});
+
+console.log('\nT-18  ritmo entre operacoes');
+teste('o intervalo dobra ao bater no limite de requisicoes', () => {
+  igual(proximoIntervalo(8000), 16000);
+  igual(proximoIntervalo(16000), 32000);
+});
+teste('o intervalo tem teto, para nao virar espera infinita', () => {
+  igual(proximoIntervalo(90000), 120000);
+  igual(proximoIntervalo(120000), 120000);
+});
+teste('a retomada comeca pelo maior entre o configurado e o aprendido', () => {
+  igual(intervaloInicial(8000, 32000), 32000, 'o aprendido apos um 429 nao pode ser esquecido');
+  igual(intervaloInicial(20000, 8000), 20000, 'o configurado maior prevalece');
+  igual(intervaloInicial(8000, null), 8000);
+  igual(intervaloInicial(8000, 999999), 120000, 'nem o aprendido escapa do teto');
+});
+teste('pausa que estica muito alem do pedido e estrangulamento', () => {
+  verdade(houveEstrangulamento(8000, 30000), 'oito segundos que viraram trinta');
+  verdade(!houveEstrangulamento(8000, 8400), 'variacao normal de temporizador');
+  verdade(!houveEstrangulamento(8000, 9500), 'um segundo e meio a mais nao merece aviso');
+});
+teste('pausa curta esticada nao dispara aviso, porque o desvio absoluto e pequeno', () => {
+  verdade(!houveEstrangulamento(1000, 2500), 'dobrou, mas sao 1,5 s de diferenca');
+});
 
 console.log('\nT-08  conciliacao entre o que o indice declarou e o que foi baixado');
 teste('peca declarada e nunca baixada aparece na relacao de faltantes', () => {

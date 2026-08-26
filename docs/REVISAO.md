@@ -2,7 +2,7 @@
 
 Revisão completa do código depois da validação em produção. Feita sob o mesmo regime de evidência do resto do projeto: cada afirmação marcada, cada defeito reproduzido antes de corrigido, cada correção acompanhada de teste.
 
-Ponto de partida: 22 testes passando, execução real de 13.002 folhas sem erro. Ponto de chegada: 54 testes passando, sete defeitos corrigidos — dois deles faziam a extensão mentir sobre o próprio resultado — e a terceira camada de conferência, que a especificação previa e nunca havia sido construída.
+Ponto de partida: 22 testes passando, execução real de 13.002 folhas sem erro. Ponto de chegada: 63 testes passando, sete defeitos corrigidos — dois deles faziam a extensão mentir sobre o próprio resultado — e a terceira camada de conferência, que a especificação previa e nunca havia sido construída.
 
 ---
 
@@ -131,7 +131,30 @@ arquivo de 20 MB      : 1.134 ms, desprezivel diante do intervalo de 8 s
 
 ---
 
-## 8. O que continua por verificar
+## 8. Nomes de saída e aviso de temporizador
+
+**Os nomes dos arquivos.** Saíam como `12345678920208190001_003_974-1040.pdf`. A informação toda estava lá — processo, sequencial, faixa de folhas —, mas vinte dígitos seguidos de mais dígitos não se leem, e o usuário descreveu o resultado como "nome aleatório". O problema era legibilidade, não falta de dado.
+
+Passaram a sair assim:
+
+```
+12345678920208190001 - fls 00001 a 00489 - Parte 001.pdf
+12345678920208190001 - fls 00490 a 00973 - Parte 002.pdf
+12345678920208190001 - fls 00974 a 01040 - Parte 003.pdf
+12345678920208190001 - manifesto.json
+```
+
+O raciocínio de cada parte está na **RF-11**. Em resumo: o processo na frente para o arquivo sobreviver a ser arrastado para fora da pasta, os zeros à esquerda para a ordenação alfabética coincidir com a ordem das folhas, e a palavra "Parte" porque é o que se procura ao abrir a pasta.
+
+**O aviso de temporizador esticado**, que era a pendência 10 da seção 13 do dossiê e estava só documentada. O Chrome desacelera temporizador de aba em segundo plano, então as pausas entre lotes ficam maiores que os oito segundos configurados. Não corrompe resultado e até alivia o servidor, mas execução que se arrasta sem explicação parece travada, e o usuário a interrompe achando que deu errado.
+
+Agora a aba mede quanto tempo realmente passou em cada pausa e avisa uma vez, explicando o que está acontecendo e o que fazer. O critério exige desvio de mais de cinquenta por cento **e** de pelo menos três segundos: o fator sozinho transformaria ruído normal de temporizador em alarme, e alarme falso ensina o usuário a ignorar alarme.
+
+As duas decisões viraram funções puras em `src/lib/`, `lotes.js` e o novo `ritmo.js`, que também passou a abrigar o cálculo do recuo após recusa por excesso de requisições e a escolha do intervalo inicial na retomada, ambos até então soltos no orquestrador.
+
+---
+
+## 9. O que continua por verificar
 
 Nada aqui pode ser medido sem a sessão autenticada do tribunal, que é do usuário.
 
